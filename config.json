@@ -1,7 +1,8 @@
 {
     "server": {
 		"port": "8080",
-		"metricsport": 7070
+		"metricsport": 7070,
+        "pprofPort": 6060
 	},
 
     "exchangeRateAPI": {

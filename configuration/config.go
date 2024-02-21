@@ -17,6 +17,7 @@ type AppConfig struct {
 	Server struct {
 		Port        string `json:"port"`
 		MetricsPort int    `json:"metricsport"`
+		PprofPort   int    `json:"pprofPort"`
 	} `json:"server"`
 
 	ExchangeRateConfig struct {
