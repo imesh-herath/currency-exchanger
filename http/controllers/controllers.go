@@ -10,7 +10,6 @@ import (
 	"net/http"
 )
 
-
 func ConvertCurrencyHandler(w http.ResponseWriter, r *http.Request) {
 	var req entities.ConvertRequest
 

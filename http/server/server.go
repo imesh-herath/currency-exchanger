@@ -3,12 +3,14 @@ package server
 import (
 	"assignment-imesh/configuration"
 	"assignment-imesh/http/router"
-	"expvar"
+	// "expvar"
 
 	"context"
 	"fmt"
 	"net/http"
 	"time"
+
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 type Server struct {
@@ -30,7 +32,7 @@ func NewServer(appConfig configuration.AppConfig) *Server {
 	}
 
 	// Expose application metrics
-	r.Handle("/metrics", expvar.Handler())
+	r.Handle("/metrics", promhttp.Handler())
 
 	return srv
 }

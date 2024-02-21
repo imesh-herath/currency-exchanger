@@ -3,8 +3,10 @@ package main
 import (
 	"assignment-imesh/configuration"
 	"assignment-imesh/http/server"
+	"assignment-imesh/profiling"
 	"assignment-imesh/usecase"
 	"fmt"
+	_ "net/http/pprof"
 	"os"
 	"os/signal"
 	"syscall"
@@ -17,6 +19,9 @@ var (
 func main() {
 	// Load configuration from file
 	configuration.Init()
+
+	// expose application profiling
+	profiling.Profiling(configuration.App)
 
 	httpServer = server.NewServer(configuration.App)
 
