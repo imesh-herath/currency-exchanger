@@ -10,12 +10,6 @@ import (
 	"time"
 )
 
-// var (
-// 	lastUpdated   time.Time
-// 	exchangeRates map[string]float64
-// 	lock          sync.Mutex
-// )
-
 // UpdateExchangeRates fetches the latest exchange rates from the API
 func UpdateExchangeRates() error {
 	url := configuration.App.ExchangeRateConfig.URL
