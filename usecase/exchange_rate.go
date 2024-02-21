@@ -13,7 +13,7 @@ var (
 )
 
 func GetExchangeRate(fromCurrency string, toCurrency string) (float64, error) {
-	//Set a mutex lock for syncrization access to the function
+	//Set a mutex lock for syncrization for prevent race condition when access to the function
 	lock.Lock()
 	defer lock.Unlock() //unlock the end of the process
 

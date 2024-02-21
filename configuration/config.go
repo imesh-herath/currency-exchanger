@@ -9,8 +9,7 @@ import (
 const Config string = "config.json"
 
 var (
-	configLoaded bool = false
-	App          AppConfig
+	App AppConfig
 )
 
 type AppConfig struct {
@@ -26,9 +25,6 @@ type AppConfig struct {
 }
 
 func Init() {
-	if configLoaded {
-		return
-	}
 	appConfigContents, err := ioutil.ReadFile(Config)
 	if err != nil {
 		log.Panic("Application configuration file unreadable: ", err)
@@ -39,5 +35,4 @@ func Init() {
 		log.Panic("Application configuration file unreadable: ", err)
 	}
 	App = appConfig
-	configLoaded = true
 }

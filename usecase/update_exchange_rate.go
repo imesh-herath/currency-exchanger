@@ -14,7 +14,7 @@ import (
 func UpdateExchangeRates() error {
 	url := configuration.App.ExchangeRateConfig.URL
 
-	//Get the exchange rates from a http call
+	// Make an HTTP GET request to fetch the exchange rates.
 	resp, err := http.Get(url)
 	if err != nil {
 		log.Printf("Failed to fetch exchange rates: %s\n", err)
@@ -30,14 +30,14 @@ func UpdateExchangeRates() error {
 		return err
 	}
 
-	//Unmarshalling the bady
+	// Unmarshal the response body into ExchangeRatesResponse struct.
 	err = json.Unmarshal(body, &exchangeRatesResponse)
 	if err != nil {
 		log.Printf("Failed to unmarshal exchange rates: %s\n", err)
 		return err
 	}
 
-	//Set a mutex lock for syncrization access to the Rates map
+	//Set a mutex lock for syncrization for prevent race condition when access to the Rates map
 	lock.Lock()
 	exchangeRates = exchangeRatesResponse.Rates
 	lastUpdated = time.Now()
