@@ -2,8 +2,8 @@ package main
 
 import (
 	"assignment-imesh/configuration"
-	"assignment-imesh/http/controllers"
 	"assignment-imesh/http/server"
+	"assignment-imesh/usecase"
 	"fmt"
 	"os"
 	"os/signal"
@@ -21,7 +21,7 @@ func main() {
 	httpServer = server.NewServer(configuration.App)
 
 	// Initial update of exchange rates
-	err := controllers.UpdateExchangeRates()
+	err := usecase.UpdateExchangeRates()
 	if err != nil {
 		fmt.Println("Failed to retrieve initial exchange rates:", err)
 		return

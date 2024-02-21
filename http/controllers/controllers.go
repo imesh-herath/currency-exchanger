@@ -1,91 +1,18 @@
 package controllers
 
 import (
-	"assignment-imesh/configuration"
+	"assignment-imesh/entities"
+	"assignment-imesh/usecase"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
-	"sync"
-	"time"
 )
 
-type ExchangeRatesResponse struct {
-	Rates map[string]float64 `json:"conversion_rates"`
-}
-
-type ConvertRequest struct {
-	FromCurrency string  `json:"fromCurrency"`
-	Amount       float64 `json:"amount"`
-	ToCurrency   string  `json:"toCurrency"`
-}
-
-type ConvertResponse struct {
-	Amount   float64 `json:"amount"`
-	Currency string  `json:"currency"`
-}
-
-var (
-	lastUpdated   time.Time
-	exchangeRates map[string]float64
-	lock          sync.Mutex
-)
-
-// UpdateExchangeRates fetches the latest exchange rates from the API
-func UpdateExchangeRates() error {
-	url := configuration.App.ExchangeRateConfig.URL
-	resp, err := http.Get(url)
-	if err != nil {
-		log.Printf("Failed to fetch exchange rates: %s\n", err)
-		return err
-	}
-	defer resp.Body.Close()
-
-	var exchangeRatesResponse ExchangeRatesResponse
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Printf("Failed to read response body: %s\n", err)
-		return err
-	}
-
-	err = json.Unmarshal(body, &exchangeRatesResponse)
-	if err != nil {
-		log.Printf("Failed to unmarshal exchange rates: %s\n", err)
-		return err
-	}
-
-	lock.Lock()
-	exchangeRates = exchangeRatesResponse.Rates
-	lastUpdated = time.Now()
-	lock.Unlock()
-
-	log.Println("Exchange rates sucessfully updated")
-
-	return nil
-}
-
-func getExchangeRate(fromCurrency string, toCurrency string) (float64, error) {
-	lock.Lock()
-	defer lock.Unlock()
-
-	if time.Since(lastUpdated).Hours() >= 3 || exchangeRates == nil {
-		err := UpdateExchangeRates()
-		if err != nil {
-			return 0, err
-		}
-	}
-
-	rate, ok := exchangeRates[fromCurrency]
-	if !ok {
-		return 0, fmt.Errorf("exchange rate not available for %s", fromCurrency)
-	}
-
-	return rate, nil
-}
 
 func ConvertCurrencyHandler(w http.ResponseWriter, r *http.Request) {
-	var req ConvertRequest
+	var req entities.ConvertRequest
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Printf("Failed to read request body: %s\n", err)
@@ -98,7 +25,7 @@ func ConvertCurrencyHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	exchangeRate, err := getExchangeRate(req.FromCurrency, req.ToCurrency)
+	exchangeRate, err := usecase.GetExchangeRate(req.FromCurrency, req.ToCurrency)
 	if err != nil {
 		log.Printf("Failed to retrieve exchange rate: %s\n", err)
 		return
@@ -106,7 +33,7 @@ func ConvertCurrencyHandler(w http.ResponseWriter, r *http.Request) {
 
 	convertedAmount := req.Amount / exchangeRate
 
-	res := ConvertResponse{
+	res := entities.ConvertResponse{
 		Amount:   convertedAmount,
 		Currency: req.ToCurrency,
 	}
