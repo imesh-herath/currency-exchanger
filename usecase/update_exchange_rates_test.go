@@ -20,7 +20,7 @@ func TestUpdateExchangeRates(t *testing.T) {
     exchangeRatesResponse := entities.ExchangeRatesResponse{
         Rates: map[string]float64{
             "USD": 1.0,
-            "EUR": 0.85,
+            "LKR": 311.758,
             "GBP": 0.73,
         },
     }

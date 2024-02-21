@@ -12,7 +12,7 @@ func TestGetExchangeRate(t *testing.T) {
 	// Mock exchange rates
 	exchangeRates = map[string]float64{
 		"USD": 1.0,
-		"LKR": 314.0,
+		"LKR": 311.758,
 		"GBP": 0.73,
 	}
 
