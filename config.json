@@ -1,0 +1,12 @@
+{
+    "server": {
+		"port": "8080",
+		"metricsport": 7070
+	},
+
+    "exchangeRateAPI": {
+        "url": "https://v6.exchangerate-api.com/v6/edc5b721a1b3409d75811ed3/latest/USD"
+    }
+
+
+}
