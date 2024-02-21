@@ -13,6 +13,8 @@ import (
 // UpdateExchangeRates fetches the latest exchange rates from the API
 func UpdateExchangeRates() error {
 	url := configuration.App.ExchangeRateConfig.URL
+
+	//Get the exchange rates from a http call
 	resp, err := http.Get(url)
 	if err != nil {
 		log.Printf("Failed to fetch exchange rates: %s\n", err)
@@ -21,18 +23,21 @@ func UpdateExchangeRates() error {
 	defer resp.Body.Close()
 
 	var exchangeRatesResponse entities.ExchangeRatesResponse
+	//Read the respose body
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Printf("Failed to read response body: %s\n", err)
 		return err
 	}
 
+	//Unmarshalling the bady
 	err = json.Unmarshal(body, &exchangeRatesResponse)
 	if err != nil {
 		log.Printf("Failed to unmarshal exchange rates: %s\n", err)
 		return err
 	}
 
+	//Set a mutex lock for syncrization access to the Rates map
 	lock.Lock()
 	exchangeRates = exchangeRatesResponse.Rates
 	lastUpdated = time.Now()

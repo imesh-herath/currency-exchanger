@@ -7,6 +7,7 @@ import (
 )
 
 func Init() *mux.Router {
+	//New mux router
 	router := mux.NewRouter()
 
 	// Set up routes

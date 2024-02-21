@@ -9,8 +9,8 @@ import (
 
 func TestConvertCurrencyHandler(t *testing.T) {
 	// Prepare a sample request
-	requestBody := []byte(`{"fromCurrency": "USD", "toCurrency": "EUR", "amount": 100}`)
-	req, err := http.NewRequest("POST", "/convert", bytes.NewBuffer(requestBody))
+	requestBody := []byte(`{"fromCurrency": "LKR", "toCurrency": "USD", "amount": 314.0}`)
+	req, err := http.NewRequest("GET", "/convert", bytes.NewBuffer(requestBody))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -36,7 +36,7 @@ func TestConvertCurrencyHandler(t *testing.T) {
 	}
 
 	// Check the response body
-	expectedResponseBody := `{"amount":20,"currency":"EUR"}`
+	expectedResponseBody := `{"amount":1.007191475439283,"currency":"USD"}`
 	if rr.Body.String() != expectedResponseBody {
 		t.Errorf("handler returned unexpected body: got %v want %v",
 			rr.Body.String(), expectedResponseBody)
