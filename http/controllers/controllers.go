@@ -13,29 +13,31 @@ import (
 func ConvertCurrencyHandler(w http.ResponseWriter, r *http.Request) {
 	var req entities.ConvertRequest
 
-	//Read the request body
+	// Read the request body
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Printf("Failed to read request body: %s\n", err)
 		return
 	}
 
-	//Unmarshal the request body
+	// Unmarshal the request body
 	err = json.Unmarshal(body, &req)
 	if err != nil {
 		log.Printf("Failed to unmarshal request: %s\n", err)
 		return
 	}
 
-	//Get the Exchange rates for given currencies
+	// Get the Exchange rates for given currencies
 	exchangeRate, err := usecase.GetExchangeRate(req.FromCurrency, req.ToCurrency)
 	if err != nil {
 		log.Printf("Failed to retrieve exchange rate: %s\n", err)
 		return
 	}
 
+	// Calculate the converted amount
 	convertedAmount := req.Amount / exchangeRate
 
+	// Prepare the response
 	res := entities.ConvertResponse{
 		Amount:   convertedAmount,
 		Currency: req.ToCurrency,
