@@ -3,7 +3,6 @@ package server
 import (
 	"assignment-imesh/configuration"
 	"assignment-imesh/http/router"
-
 	"context"
 	"fmt"
 	"net/http"
@@ -37,17 +36,16 @@ func NewServer(appConfig configuration.AppConfig) *Server {
 }
 
 func (server *Server) Start() error {
-	// run HTTP server in a goroutine so that it doesn't block
+	// Run HTTP server in a goroutine so that it doesn't block
 	go func() {
 		err := server.httpSrv.ListenAndServe()
-		if err != nil {
+		if err != nil && err != http.ErrServerClosed {
 			fmt.Println("http.server.Init", err)
 			panic("HTTP server shutting down unexpectedly...")
 		}
 	}()
 
 	fmt.Println("http.server.Init", fmt.Sprintf("HTTP server listening on %s", server.httpSrv.Addr))
-
 	return nil
 }
 
@@ -57,6 +55,8 @@ func (server *Server) Stop() {
 
 	err := server.httpSrv.Shutdown(ctx)
 	if err != nil {
-		fmt.Println("http.server.gracefully.ShutDown", "Unable to stop HTTP server")
+		fmt.Println("http.server.gracefully.ShutDown", "Unable to stop HTTP server:", err)
+	} else {
+		fmt.Println("http.server.gracefully.ShutDown", "HTTP server stopped gracefully")
 	}
 }
