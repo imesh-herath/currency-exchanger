@@ -17,8 +17,8 @@ var (
 	lock                sync.Mutex
 	latencyWindow       []time.Duration
 	latencyLock         sync.Mutex
-	percentileThreshold = 600 * time.Millisecond // 300ms threshold
-	maxWindowSize       = 100                     // Sliding window size
+	percentileThreshold = 800 * time.Millisecond // 300ms threshold
+	maxWindowSize       = 100                    // Sliding window size
 
 	// Circuit breaker states
 	circuitOpen      = false
@@ -54,7 +54,8 @@ func GetExchangeRateWithCircuitBreaker(fromCurrency, toCurrency string) (float64
 			testRequestCount = 0
 		} else {
 			log.Println("Circuit is open. Rejecting request.")
-			return 0, fmt.Errorf("circuit breaker open")
+			resetLatencyTracking()
+			return 0, fmt.Errorf("circuit breaker open, reset latency tracking")
 		}
 	}
 
@@ -126,6 +127,7 @@ func GetExchangeRateWithCircuitBreaker(fromCurrency, toCurrency string) (float64
 	if halfOpen {
 		log.Println("Half-Open Test Succeeded. Closing the circuit.")
 		halfOpen = false
+		circuitOpen = false
 		resetLatencyTracking()
 	}
 
@@ -155,27 +157,23 @@ func getLatencyPercentile(percentile int) time.Duration {
 	}
 
 	// Copy and sort latencies
-	/*
-		Percentile calculations requires data to be sorted in ascending order to identify the
-		correct value at the given percentile.
-	*/
 	sortedLatencies := append([]time.Duration(nil), latencyWindow...)
 	sort.Slice(sortedLatencies, func(i, j int) bool { return sortedLatencies[i] < sortedLatencies[j] })
 
-	// Get percentile index
-	/*
-		Used this formula because it scales the percentile (0 to 100) to the length of the sorted latencies slice.
-		This way, ensure that the index is within the bounds of the slice.
-		If the index is greater than the length of the slice, then return the last element.
-	*/
+	// Handle edge cases where window size is small
+	if len(sortedLatencies) == 1 {
+		log.Printf("Single latency recorded, using it for percentile.")
+		return sortedLatencies[0]
+	}
+
+	// Calculate index for percentile
 	index := (percentile * len(sortedLatencies)) / 100
 	if index >= len(sortedLatencies) {
 		index = len(sortedLatencies) - 1
 	}
 
-	log.Printf("Latency window: %v", sortedLatencies)
-	log.Printf("%dth percentile latency: %.2f ms", percentile, sortedLatencies[index].Seconds()*1000)
-
+	// Log percentile latency
+	log.Printf("90th percentile latency: %.2f ms", sortedLatencies[index].Seconds()*1000)
 	return sortedLatencies[index]
 }
 
