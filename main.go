@@ -9,7 +9,9 @@ import (
 	_ "net/http/pprof"
 	"os"
 	"os/signal"
+	"runtime/trace"
 	"syscall"
+	"time"
 )
 
 var (
@@ -17,6 +19,19 @@ var (
 )
 
 func main() {
+	// Setup tracing
+	tracerCfg := trace.FlightRecorderConfig{
+		MinAge:   5 * time.Second,
+		MaxBytes: 3 << 20, // 3MB
+	}
+
+	// Create and start the FlightRecorder
+	fr := trace.NewFlightRecorder(tracerCfg)
+	if err := fr.Start(); err != nil {
+		panic(err)
+	}
+	defer fr.Stop()
+
 	// Load configuration from file
 	configuration.Init()
 
@@ -47,6 +62,15 @@ func main() {
 	signal := <-c
 	fmt.Println("bootstrap.init.Start", fmt.Sprintf("Received Signal: %s", signal))
 
+	// Dump the FlightRecorder trace to a file on shutdown
+	writeTrace(fr)
+
 	// Start destructing the process
 	httpServer.Stop()
+}
+
+func writeTrace(fr *trace.FlightRecorder) {
+	f, _ := os.Create("trace.out")
+	defer f.Close()
+	fr.WriteTo(f)
 }
